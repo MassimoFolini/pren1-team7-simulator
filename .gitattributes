@@ -3,3 +3,4 @@
 *.service text eol=lf
 *.desktop text eol=lf
 *.ps1 text eol=crlf
+*.min.js -text
