@@ -1,0 +1,16 @@
+{
+  "title": "03 Not-Aus während der Suche",
+  "description": "Anf. 7.1: Not-Aus während der Fahrt. Der Roboter muss sofort stehen (Hardware-Not-Aus wirkt im Mikrocontroller ohne den Rechner). Danach Entriegeln und Quittieren.",
+  "seed": 5,
+  "bone": {"x": 4.0, "y": 0.5, "th": 0.2},
+  "max_s": 120,
+  "required": ["7.1"],
+  "steps": [
+    {"do": "say", "word": "SUCH", "expect": {"event": "search_start"}, "timeout": 6, "retries": 3},
+    {"do": "wait", "s": 6.0},
+    {"do": "estop", "expect": {"event": "stopped"}, "timeout": 3, "label": "Not-Aus drücken"},
+    {"do": "wait", "s": 1.5},
+    {"do": "estop_release", "label": "Taster entriegeln"},
+    {"do": "reset", "expect": {"state": "BEREIT"}, "timeout": 5, "label": "Quittieren / Neustart"}
+  ]
+}

@@ -1,0 +1,6 @@
+# Optional: Weboberfläche im Vollbild auf dem Pi-Bildschirm öffnen (Raspberry Pi OS mit Desktop).
+# Kopieren nach ~/.config/autostart/kiosk.desktop
+[Desktop Entry]
+Type=Application
+Name=PREN Simulator (Vollbild)
+Exec=chromium-browser --kiosk --noerrdialogs --disable-infobars http://localhost:8080/

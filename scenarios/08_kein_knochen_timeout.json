@@ -1,0 +1,12 @@
+{
+  "title": "08 Knochen nicht auffindbar (Abbruch nach 2 Minuten)",
+  "description": "Aufgabenstellung Folie 7: Abbruch nach 2 Minuten, falls der Such-Versuch nicht beendet ist. Der Knochen liegt ausserhalb des Suchbereichs; der Roboter muss abbrechen, zurück ins Startfeld fahren und sitzen.",
+  "seed": 3,
+  "bone": {"x": 1.5, "y": 3.5, "th": 0.0},
+  "max_s": 300,
+  "required": ["3.4/3.5"],
+  "steps": [
+    {"do": "say", "word": "SUCH", "expect": {"event": "search_start"}, "timeout": 6, "retries": 3},
+    {"do": "wait_event", "event": "run_complete", "timeout": 200}
+  ]
+}

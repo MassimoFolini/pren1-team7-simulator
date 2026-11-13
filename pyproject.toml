@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pren-sim"
+version = "0.1.0"
+description = "PREN1 HS26 Team 7 – Simulator / Digital Twin des interaktiven Hunde-Roboters (Variante V2)"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = []          # bewusst keine: nur Python-Standardbibliothek (läuft offline, auch auf dem Raspberry Pi 5)
+
+[project.optional-dependencies]
+serial = ["pyserial>=3.5"]     # echte UART-Verbindung Pi <-> Mikrocontroller (link.SerialLink)
+
+[project.scripts]
+pren-sim = "pren_sim.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+pren_sim = ["web/*"]

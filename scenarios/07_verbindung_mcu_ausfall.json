@@ -1,0 +1,15 @@
+{
+  "title": "07 Verbindungsausfall Rechner ↔ Mikrocontroller",
+  "description": "Integrationsrisiko von V2 (MS2): Die UART-Verbindung fällt während der Suche für 2 s aus. Der Mikrocontroller stoppt über den Watchdog selbständig, der Rechner meldet einen Fehler und fängt sich nach der Wiederverbindung.",
+  "seed": 9,
+  "bone": {"x": 4.0, "y": -0.6, "th": 0.3},
+  "max_s": 120,
+  "required": [],
+  "steps": [
+    {"do": "say", "word": "SUCH", "expect": {"event": "search_start"}, "timeout": 6, "retries": 3},
+    {"do": "wait", "s": 6.0},
+    {"do": "env", "env": {"link_ok": false}, "expect": {"event": "fault"}, "timeout": 3, "label": "Verbindung trennen (Fehler am Rechner erwartet)"},
+    {"do": "wait", "s": 1.5},
+    {"do": "env", "env": {"link_ok": true}, "expect": {"state": "BEREIT"}, "timeout": 6, "label": "Verbindung wiederherstellen"}
+  ]
+}

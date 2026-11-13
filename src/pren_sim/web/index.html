@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PREN1 Team 7 – Simulator Hunde-Roboter</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <span class="logo" aria-hidden="true">🐕</span>
+    <div>
+      <h1>Simulator / Digital Twin <small>Hunde-Roboter · Variante V2 «Verteilte Architektur»</small></h1>
+      <p class="sub">PREN1 HS26 · Team 7 · Raspberry&nbsp;Pi&nbsp;5 (Wahrnehmung, Zustandsautomat) + Mikrocontroller (Echtzeit, Not-Aus)</p>
+    </div>
+  </div>
+  <div class="ctrl">
+    <span class="chip" id="conn" title="Verbindung zum Simulator-Server">● verbinde …</span>
+    <span class="chip mono" id="simtime">t = 0.0 s</span>
+    <span class="chip mono" id="load" title="Rechenlast des Simulators (Anteil eines Kerns)">CPU –</span>
+    <button id="btnPause" class="btn" title="Pause / Weiter (Leertaste)">⏸ Pause</button>
+    <label class="sel">Tempo
+      <select id="speed">
+        <option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option>
+        <option value="5">5×</option><option value="10">10×</option><option value="25">25×</option>
+      </select>
+    </label>
+    <button id="btnReset" class="btn" title="Neustart mit gleichem Seed">↺ Neustart</button>
+    <button id="btnTheme" class="btn ghost" title="Hell / Dunkel">◐</button>
+  </div>
+</header>
+
+<main class="layout">
+  <!-- ========== linke Spalte: Bedienung ========== -->
+  <aside class="col left">
+    <section class="card">
+      <h2>Schiedsrichter</h2>
+      <h3>Sprachbefehle</h3>
+      <div class="btns" id="voiceBtns">
+        <button class="btn cmd" data-say="HIER" title="Taste 1">HIER</button>
+        <button class="btn cmd" data-say="BRAV" title="Taste 2">BRAV</button>
+        <button class="btn cmd" data-say="SITZ" title="Taste 3">SITZ</button>
+        <button class="btn cmd" data-say="SUCH" title="Taste 4">SUCH</button>
+        <button class="btn cmd wide" data-say="KUNSTSTUECK" title="Taste 5">Zusatzbefehl <small>(Platzhalter)</small></button>
+      </div>
+      <h3>Gesten</h3>
+      <div class="btns">
+        <button class="btn cmd" data-gesture="SITZ" title="Taste Q">✋ SITZ</button>
+        <button class="btn cmd" data-gesture="PLATZ" title="Taste W">☝ PLATZ</button>
+        <button class="btn cmd" data-gesture="AUF" title="Taste E">☝ AUF</button>
+      </div>
+      <h3>Taster am Roboter</h3>
+      <div class="btns">
+        <button class="btn cmd" id="btnStart">Start-Taster</button>
+      </div>
+      <button id="btnEstop" class="estop" title="Taste N">NOT-AUS</button>
+      <div class="btns" id="estopActions" hidden>
+        <button class="btn" id="btnRelease">Taster entriegeln</button>
+        <button class="btn" id="btnEstopReset">Quittieren</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Umgebung</h2>
+      <label class="slider">Störgeräusch <output id="oNoise">45 dB</output>
+        <input type="range" id="rNoise" min="30" max="80" step="1" value="45"></label>
+      <label class="slider">Raumlicht <output id="oLight">500 lx</output>
+        <input type="range" id="rLight" min="0" max="100" step="1" value="62"></label>
+      <label class="slider">Abstand Schiedsrichter <output id="oRef">1.5 m</output>
+        <input type="range" id="rRef" min="0.5" max="2" step="0.1" value="1.5"></label>
+      <label class="slider">Boden knochenfarben <output id="oFloor">0 %</output>
+        <input type="range" id="rFloor" min="0" max="100" step="5" value="0"></label>
+    </section>
+
+    <section class="card">
+      <h2>Fehlerinjektion</h2>
+      <label class="tog"><input type="checkbox" data-fail="mic_ok"> Mikrofon ausgefallen</label>
+      <label class="tog"><input type="checkbox" data-fail="camera_ok"> Kamera ausgefallen</label>
+      <label class="tog"><input type="checkbox" data-fail="link_ok"> UART Pi ↔ MCU getrennt</label>
+      <label class="tog"><input type="checkbox" data-fail="touch_taster_ok"> Fühler/Taster an der Nase defekt</label>
+      <label class="tog"><input type="checkbox" data-fail="touch_camera_ok"> Berührungserkennung (Kamera) defekt</label>
+    </section>
+
+    <section class="card">
+      <h2>Knochen</h2>
+      <div class="btns">
+        <button class="btn" id="btnBoneRandom">zufällig</button>
+        <button class="btn" id="btnBoneFar">am Rand</button>
+        <button class="btn" id="btnBoneOut">ausserhalb</button>
+      </div>
+      <p class="hint">Im Spielfeld ziehen oder doppelklicken. Auch der Schiedsrichter lässt sich verschieben.</p>
+    </section>
+  </aside>
+
+  <!-- ========== Mitte: Spielfeld ========== -->
+  <section class="col center">
+    <div class="arena card">
+      <div class="arena-bar">
+        <span class="statebadge" id="stateBadge">INIT</span>
+        <span id="poseBadge" class="chip">Haltung: –</span>
+        <span id="outBadge" class="chip" hidden></span>
+        <span class="spacer"></span>
+        <label class="tog sm"><input type="checkbox" id="vFov" checked> Sichtfeld</label>
+        <label class="tog sm"><input type="checkbox" id="vTrail" checked> Spur</label>
+        <label class="tog sm"><input type="checkbox" id="vOdom" checked> Odometrie</label>
+        <label class="tog sm"><input type="checkbox" id="vGrid" checked> Raster</label>
+      </div>
+      <div class="canvaswrap"><canvas id="arena" aria-label="Spielfeld aus der Vogelperspektive"></canvas>
+        <div class="banner" id="banner" hidden></div></div>
+    </div>
+  </section>
+
+  <!-- ========== rechte Spalte: Innenleben ========== -->
+  <aside class="col right">
+    <section class="card">
+      <h2>Status <small>(wie Folie 8 der Aufgabenstellung)</small></h2>
+      <pre class="status" id="statusBox">command = -
+robot_state = INIT
+target = not found
+confidence = 0.00</pre>
+      <div class="bar"><i id="confBar"></i></div>
+    </section>
+
+    <section class="card">
+      <h2>Zustandsautomat</h2>
+      <svg id="fsm" viewBox="0 0 330 214" role="img" aria-label="Zustandsdiagramm"></svg>
+    </section>
+
+    <section class="card">
+      <h2>Wahrnehmung <small>[Pi]</small></h2>
+      <dl class="kv" id="percept"></dl>
+    </section>
+
+    <section class="card">
+      <h2>Mikrocontroller <small>[MCU]</small></h2>
+      <dl class="kv" id="mcu"></dl>
+    </section>
+
+    <section class="card">
+      <h2>Haltung &amp; Energie</h2>
+      <canvas id="side" width="300" height="110" aria-label="Seitenansicht"></canvas>
+      <div class="bar soc"><i id="socBar"></i></div>
+      <dl class="kv" id="energy"></dl>
+    </section>
+  </aside>
+
+  <!-- ========== unten ========== -->
+  <section class="bottom card">
+    <nav class="tabs" id="tabs">
+      <button data-tab="log" class="on">Protokoll</button>
+      <button data-tab="req">Anforderungen <span class="count" id="reqCount"></span></button>
+      <button data-tab="scn">Szenarien</button>
+      <button data-tab="tst">Tests</button>
+      <button data-tab="inf">Info &amp; Annahmen</button>
+    </nav>
+    <div class="pane on" id="pane-log">
+      <div class="filters" id="logFilters"></div>
+      <div class="scroll" id="logBox"><table class="tbl" id="logTbl"><tbody></tbody></table></div>
+    </div>
+    <div class="pane" id="pane-req">
+      <div class="reqsum" id="reqSum"></div>
+      <div class="scroll"><table class="tbl" id="reqTbl"><thead><tr><th>Anf.</th><th>Prüfung</th><th>Status</th><th>Wert</th><th>Grenze</th></tr></thead><tbody></tbody></table></div>
+    </div>
+    <div class="pane" id="pane-scn"><div class="scroll" id="scnBox"></div></div>
+    <div class="pane" id="pane-tst">
+      <div class="scroll" id="tstBox">
+        <div class="testbar">
+          <button class="btn" id="tVoice">Sprache testen</button>
+          <button class="btn" id="tGesture">Gesten testen</button>
+          <button class="btn" id="tMC">Monte-Carlo-Suchläufe</button>
+          <label class="sel">n <input type="number" id="tN" value="100" min="5" max="2000" style="width:5em"></label>
+          <span class="hint" id="tState"></span>
+        </div>
+        <div id="tOut"></div>
+      </div>
+    </div>
+    <div class="pane" id="pane-inf"><div class="scroll info" id="infBox"></div></div>
+  </section>
+</main>
+<script src="app.js"></script>
+</body>
+</html>

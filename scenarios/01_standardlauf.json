@@ -1,0 +1,19 @@
+{
+  "title": "01 Standardlauf (Wettbewerbsablauf)",
+  "description": "Komplettlauf nach Aufgabenstellung Folie 4: Gesten SITZ/PLATZ/AUF, Sprache HIER/SITZ/BRAV, dann SUCH (Knochen finden, berühren, melden, zurück ins Startfeld, sitzen) und Zusatzbefehl (Platzhalter-Kunststück). Normale Umgebung.",
+  "seed": 7,
+  "env": {"noise_db": 45, "light_lux": 500, "referee_distance": 1.5},
+  "bone": {"x": 3.1, "y": 0.45, "th": 0.5},
+  "max_s": 300,
+  "steps": [
+    {"do": "gesture", "name": "SITZ", "expect": {"pose": "SITZ"}, "timeout": 7, "retries": 3},
+    {"do": "gesture", "name": "PLATZ", "expect": {"pose": "PLATZ"}, "timeout": 8, "retries": 3},
+    {"do": "gesture", "name": "AUF", "expect": {"pose": "STAND"}, "timeout": 8, "retries": 3},
+    {"do": "say", "word": "HIER", "expect": {"event": "here_done"}, "timeout": 14, "retries": 3},
+    {"do": "say", "word": "SITZ", "expect": {"pose": "SITZ"}, "timeout": 8, "retries": 3},
+    {"do": "say", "word": "BRAV", "expect": {"cmd": "BRAV"}, "timeout": 6, "retries": 3},
+    {"do": "say", "word": "SUCH", "expect": {"event": "search_start"}, "timeout": 6, "retries": 3},
+    {"do": "wait_event", "event": "run_complete", "timeout": 150},
+    {"do": "say", "word": "KUNSTSTUECK", "expect": {"event": "trick_done"}, "timeout": 30, "retries": 3}
+  ]
+}

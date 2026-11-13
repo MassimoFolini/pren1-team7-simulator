@@ -1,0 +1,11 @@
+{
+  "title": "04 Knochen am Rand des Suchbereichs",
+  "description": "Ungünstige Lage: Knochen weit hinten am Rand des 30°-Segments (ca. 4.6 m, 13° neben der Achse). Prüft Reichweite der Erkennung und das Im-Spielfeld-Bleiben (FAQ 6).",
+  "seed": 21,
+  "bone": {"x": 4.4, "y": 1.0, "th": -0.9},
+  "max_s": 250,
+  "steps": [
+    {"do": "say", "word": "SUCH", "expect": {"event": "search_start"}, "timeout": 6, "retries": 3},
+    {"do": "wait_event", "event": "run_complete", "timeout": 160}
+  ]
+}

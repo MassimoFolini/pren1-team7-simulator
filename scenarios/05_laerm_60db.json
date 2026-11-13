@@ -1,0 +1,14 @@
+{
+  "title": "05 Störgeräusch 60 dB",
+  "description": "Anf. 13.3 / 5.1 / 5.3: Hintergrundlärm 60 dB(A) (andere Teams im Raum), Schiedsrichter in 1 m. Die Befehle müssen ggf. mehrfach gesprochen werden; ausgewertet wird, wie oft. (Bei 2 m wird die Erkennung im Modell sehr schlecht: siehe Tab «Tests».)",
+  "seed": 33,
+  "env": {"noise_db": 60, "referee_distance": 1.0},
+  "bone": {"x": 2.8, "y": -0.5, "th": 2.0},
+  "max_s": 400,
+  "steps": [
+    {"do": "say", "word": "SITZ", "expect": {"pose": "SITZ"}, "timeout": 8, "retries": 12},
+    {"do": "say", "word": "BRAV", "expect": {"cmd": "BRAV"}, "timeout": 6, "retries": 12},
+    {"do": "say", "word": "SUCH", "expect": {"event": "search_start"}, "timeout": 6, "retries": 12},
+    {"do": "wait_event", "event": "run_complete", "timeout": 160}
+  ]
+}

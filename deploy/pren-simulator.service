@@ -1,0 +1,21 @@
+# systemd-Dienst: Simulator beim Start des Raspberry Pi automatisch starten.
+# Installation (Pfad/Benutzer anpassen):
+#   sudo cp deploy/pren-simulator.service /etc/systemd/system/
+#   sudo systemctl daemon-reload && sudo systemctl enable --now pren-simulator
+#   journalctl -u pren-simulator -f        # Log ansehen
+[Unit]
+Description=PREN1 Team 7 Simulator (Digital Twin Hunde-Roboter)
+After=network.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/Prenn
+Environment=PYTHONPATH=/home/pi/Prenn/src
+# 0.0.0.0 = auch vom Laptop im selben Netz erreichbar; für nur lokal: 127.0.0.1
+ExecStart=/usr/bin/python3 -X utf8 -m pren_sim serve --host 0.0.0.0 --port 8080
+Restart=on-failure
+Nice=5
+
+[Install]
+WantedBy=multi-user.target

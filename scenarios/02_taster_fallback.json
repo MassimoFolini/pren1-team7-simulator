@@ -1,0 +1,14 @@
+{
+  "title": "02 Suchstart per Taster (Sprache ausgefallen)",
+  "description": "Anf. 6.5 (Rückmeldung MS1): Das Mikrofon fällt aus, SUCH wird nicht erkannt. Die Suche muss trotzdem über den Taster gestartet werden können.",
+  "seed": 11,
+  "env": {"mic_ok": false},
+  "bone": {"x": 2.4, "y": -0.3, "th": 1.2},
+  "max_s": 200,
+  "required": ["6.5", "6.4", "3.4/3.5"],
+  "steps": [
+    {"do": "say", "word": "SUCH", "expect": {"event": "search_start"}, "timeout": 4, "retries": 0, "optional": true, "label": "SUCH per Sprache (erwartet: nicht erkannt)"},
+    {"do": "button", "expect": {"event": "search_start"}, "timeout": 4, "retries": 1, "label": "Start-Taster"},
+    {"do": "wait_event", "event": "run_complete", "timeout": 150}
+  ]
+}
