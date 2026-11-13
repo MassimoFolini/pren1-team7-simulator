@@ -39,9 +39,27 @@ lassen sich nicht sprechen: dafür die Gesten-Knöpfe nutzen.
 * Ohne Internet oder in Firefox ist die Funktion nicht verfügbar; alles andere läuft weiter.
 * Zwischenergebnisse haben oft keine echte Konfidenz; dafür wird 0.8 angenommen, bei fertigen Ergebnissen die Konfidenz des Browsers.
 
+## Live-Gesten mit der Webcam
+
+Links «🖐 Webcam für Gesten einschalten» (Taste `H`), Kamera-Zugriff erlauben. Gezeigt wird in die Webcam des Laptops:
+
+| Geste | Handzeichen (Aufgabenstellung Folie 6) | Regel im Code (`web/hand.js`) |
+|---|---|---|
+| **AUF** | Zeigefinger (bzw. «L») zeigt nach oben | nur Zeigefinger gestreckt, Richtung im Bild nach oben |
+| **PLATZ** | Zeigefinger zeigt zum Boden | nur Zeigefinger gestreckt, Richtung im Bild nach unten |
+| **SITZ** | Handfläche waagerecht nach oben vor der Brust | alle vier Finger gestreckt, Handfläche waagerecht (nach oben **oder unten**) |
+
+Jedes Kamerabild wird an den Simulator geschickt und läuft durch denselben Mehrheitsfilter wie die simulierten Gesten (5 von 8 Bildern, Konfidenz ≥ 0.6).
+Das Vorschaubild zeigt die erkannten Handpunkte, darunter die Messwerte der Regeln (Fingerverhältnisse, Richtung, Handfläche) zum Nachjustieren.
+
+* **Lokal:** MediaPipe Hand Landmarker läuft als WASM direkt im Browser; Modell und Bibliothek liegen in `web/vendor/mediapipe` (Apache-2.0, ca. 17 MB). Das Kamerabild wird **nicht** hochgeladen und braucht kein Internet.
+* Funktioniert nur auf `http://localhost` (sicherer Kontext), wie das Mikrofon.
+* Solange die Webcam läuft, ersetzt sie die simulierten Gestenbilder (Schiedsrichter-Knöpfe für Gesten wirken dann nicht). Webcam aus = simulierte Gesten wieder aktiv.
+* SITZ unterscheidet nicht zwischen Handfläche oben und unten. Die Regeln sind einfache Geometrie und noch nicht mit vielen Händen/Lichtverhältnissen getestet (Ersatz später durch ein trainiertes Modell möglich).
+
 ## Tasten
 
-`1` HIER · `2` BRAV · `3` SITZ · `4` SUCH · `5` Zusatzbefehl · `M` Mikrofon · `Q` Geste SITZ · `W` Geste PLATZ · `E` Geste AUF · `S` Start-Taster · `N` NOT-AUS · `Leertaste` Pause.
+`1` HIER · `2` BRAV · `3` SITZ · `4` SUCH · `5` Zusatzbefehl · `M` Mikrofon · `H` Webcam-Gesten · `Q` Geste SITZ · `W` Geste PLATZ · `E` Geste AUF · `S` Start-Taster · `N` NOT-AUS · `Leertaste` Pause.
 
 ## Szenarien und Tests
 

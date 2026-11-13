@@ -50,6 +50,13 @@
         <div class="micheard mono" id="micHeard"></div>
         <p class="hint">Nutzt die Spracherkennung des Browsers (Chrome/Edge, <b>Online-Dienst</b>, nur auf localhost). Der echte Roboter erkennt lokal.</p>
       </div>
+      <div class="mic">
+        <button class="btn" id="btnHand" title="Taste H">🖐 Webcam für Gesten einschalten</button>
+        <div class="camprev" id="camPrev" hidden><video id="handVideo" playsinline muted></video><canvas id="handOverlay"></canvas><span class="camlabel" id="handLabel">–</span></div>
+        <div class="micstat" id="handStat">Zeige AUF, PLATZ oder SITZ vor der Webcam.</div>
+        <div class="micheard mono" id="handDebug"></div>
+        <p class="hint"><b>AUF</b> = Zeigefinger hoch · <b>PLATZ</b> = Zeigefinger nach unten · <b>SITZ</b> = flache Hand, Handfläche nach oben. Die Erkennung läuft <b>lokal</b> im Browser (kein Upload).</p>
+      </div>
       <h3>Gesten</h3>
       <div class="btns">
         <button class="btn cmd" data-gesture="SITZ" title="Taste Q">✋ SITZ</button>
@@ -196,6 +203,7 @@ confidence = 0.00</pre>
 <script src="three.min.js"></script>
 <script src="scene3d.js"></script>
 <script src="mic.js"></script>
+<script src="hand.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

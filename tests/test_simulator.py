@@ -136,6 +136,21 @@ class Ablauf(unittest.TestCase):
         self.assertNotEqual(s.brain.state, B.BEREIT)
         self.assertTrue(s.log.find("say_live"))
 
+    def test_live_gesten_gehen_durch_den_brain_filter(self):
+        s = ready_sim()
+        for _ in range(40):                          # 2 s lang SITZ-Bilder der Webcam (20 Hz)
+            s.gesture_live("SITZ", 0.9)
+            s.run_for(0.05)
+        s.run_for(3)
+        self.assertEqual(s.plant.pose, "SITZ")
+        s2 = ready_sim()
+        for i in range(40):                          # nur jedes 6. Bild passt: Mehrheitsfilter verwirft
+            s2.gesture_live("PLATZ" if i % 6 == 0 else None, 0.9)
+            s2.run_for(0.05)
+        s2.run_for(2)
+        self.assertEqual(s2.brain.state, B.BEREIT)
+        self.assertEqual(s2.plant.pose, "STAND")
+
     def test_taster_ersetzt_ausgefallene_sprache(self):
         s = ready_sim(mic_ok=False)
         s.say("SUCH")

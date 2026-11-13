@@ -174,3 +174,7 @@ tr.k-state td:last-child { color: var(--fg); } tr.k-run_complete td:last-child {
 .micstat.ok { color: var(--ok); } .micstat.bad { color: var(--bad); }
 .micheard { margin-top: 4px; min-height: 1.4em; font-size: 12px; }
 .micheard b { color: var(--ok); }
+.camprev { position: relative; margin-top: 8px; border-radius: 8px; overflow: hidden; border: 1px solid var(--line); background: #000; aspect-ratio: 4 / 3; }
+.camprev video, .camprev canvas { position: absolute; inset: 0; width: 100%; height: 100%; transform: scaleX(-1); object-fit: cover; }
+.camlabel { position: absolute; left: 6px; top: 6px; padding: 2px 9px; border-radius: 99px; background: rgba(0,0,0,.65); color: #fff; font: 700 13px var(--mono); }
+.camlabel.hit { background: var(--ok); color: #04210f; }

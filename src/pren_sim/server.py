@@ -27,6 +27,9 @@ from .experiments import gesture_matrix, monte_carlo, voice_matrix
 from .scenarios import ScenarioRunner, list_scenarios, load_scenario
 
 WEB_DIR = Path(__file__).resolve().parent / "web"
+mimetypes.add_type("text/javascript", ".mjs")
+mimetypes.add_type("application/wasm", ".wasm")
+mimetypes.add_type("application/octet-stream", ".task")
 
 
 class SimHost:
@@ -134,6 +137,8 @@ class SimHost:
                 s.say(str(body["word"]))
             elif path == "say_live":
                 s.say_live(str(body["word"]), float(body.get("conf", 0.8)), str(body.get("text", ""))[:60])
+            elif path == "gesture_live":
+                s.gesture_live(body.get("label"), float(body.get("conf", 0.0)))
             elif path == "gesture":
                 s.gesture(str(body["name"]))
             elif path == "button":

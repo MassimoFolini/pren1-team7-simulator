@@ -100,6 +100,16 @@ class GestureRecognizer:
     def __init__(self, cfg: Config, rng: random.Random):
         self.cfg, self.rng = cfg, rng
         self._g: tuple[str, float, float, float] | None = None    # (name, t_start, t_end, distanz)
+        self._live: tuple[str | None, float, float] | None = None  # (Label, Konfidenz, Zeit) echte Webcam des Bedieners
+
+    def inject_live(self, label: str | None, conf: float, now: float) -> None:
+        """Echte Gestenerkennung (Browser-Webcam, MediaPipe): ersetzt das Modell, solange Bilder eintreffen (< 0.4 s alt)."""
+        self._live = (label, conf, now)
+
+    def live_state(self, now: float):
+        if self._live and now - self._live[2] < 0.4:
+            return self._live[0], self._live[1]
+        return None
 
     def perform(self, name: str, now: float, distance: float, duration: float = 2.5) -> None:
         self._g = (name, now + 0.3, now + 0.3 + duration, distance)
@@ -126,6 +136,9 @@ class GestureRecognizer:
         env = self.cfg.env
         if not env.camera_ok:
             return None
+        lv = self.live_state(now)
+        if lv is not None:                      # Live-Webcam aktiv: nur diese Bilder zählen
+            return (lv[0], lv[1]) if lv[0] else None
         name, dist = None, 1.0
         if self._g and self._g[1] <= now <= self._g[2]:
             name, dist = self._g[0], self._g[3]

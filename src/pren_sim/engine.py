@@ -74,6 +74,13 @@ class Simulation:
         self.ref_say = (w, self.t + 1.6)
         self.log.add(self.t, "REFEREE", "say_live", f"Mikrofon live: «{text or w}» -> {w} ({conf:.2f})", word=w, conf=round(conf, 2))
 
+    def gesture_live(self, label: str | None, conf: float) -> None:
+        """Ein Kamerabild der echten Webcam (Label oder None = keine Geste)."""
+        label = label.upper() if label else None
+        self.sensors.gestures.inject_live(label, max(0.0, min(1.0, conf)), self.t)
+        if label:
+            self.ref_gesture = (label, self.t + 0.6)
+
     def press_start(self) -> None:
         self.log.add(self.t, "REFEREE", "button", "Start-Taster gedrueckt")
         if self.cfg.env.touch_taster_ok:
@@ -207,6 +214,7 @@ class Simulation:
             "referee": {"x": w.referee[0], "y": w.referee[1],
                         "say": self.ref_say[0] if self.t < self.ref_say[1] else "",
                         "gesture": self.ref_gesture[0] if self.t < self.ref_gesture[1] else ""},
+            "live_gesture": (lambda lv: None if lv is None else {"label": lv[0], "conf": round(lv[1], 2)})(self.sensors.gestures.live_state(self.t)),
             "tof": None if f is None or f.tof is None else round(f.tof, 3),
             "detect": None if (f is None or f.bone is None) else {"bearing": round(f.bone.bearing, 3), "dist": round(f.bone.dist, 3),
                                                                   "conf": round(f.bone.conf, 2)},

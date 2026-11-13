@@ -80,6 +80,7 @@ function render() {
   renderFsm();
   renderKV('#percept', [
     ['zuletzt gehört', s.brain.heard.word ? `${s.brain.heard.word} (${fmt(s.brain.heard.conf)})` : '–'],
+    ['Geste (Webcam live)', s.live_gesture ? (s.live_gesture.label ? `${s.live_gesture.label} (${fmt(s.live_gesture.conf)})` : 'Hand ohne Geste') : 'aus'],
     ['Distanzsensor', s.tof === null ? 'kein Echo' : fmt(s.tof) + ' m'],
     ['Knochen im Bild', s.detect ? `${fmt(deg(s.detect.bearing), 0)}°, ${fmt(s.detect.dist)} m, ${fmt(s.detect.conf)}` : 'nein'],
     ['Ziel (Schätzung)', s.target ? `(${fmt(s.target.x)} | ${fmt(s.target.y)}) m` : '–'],
@@ -210,6 +211,7 @@ function initControls() {
       n: ['estop', {}], s: ['button', {}] }[k];
     if (m) { api(m[0], m[1]); e.preventDefault(); }
     if (k === 'm' && initMic.toggle) { initMic.toggle(); e.preventDefault(); }
+    if (k === 'h' && initHand.toggle) { initHand.toggle(); e.preventDefault(); }
     if (k === ' ') { api('sim', { paused: !(snap && snap.paused) }); e.preventDefault(); }
   });
   // Tabs
@@ -543,10 +545,30 @@ function initMic() {
   btn.onclick = toggle; initMic.toggle = toggle;
 }
 
+/* ------------------------------------------------------------------ Webcam (Live-Gesten) */
+function initHand() {
+  const btn = $('#btnHand'), st = $('#handStat'), dbg = $('#handDebug'), lab = $('#handLabel'), prev = $('#camPrev');
+  const setBtn = on => { btn.textContent = on ? '⏹ Webcam ausschalten' : '🖐 Webcam für Gesten einschalten'; btn.classList.toggle('live', on); prev.hidden = !on; };
+  const toggle = async () => {
+    if (Hand.on) { Hand.stop(); api('gesture_live', { label: null, conf: 0 }); setBtn(false); return; }
+    btn.disabled = true; st.textContent = 'Starte Kamera …'; st.className = 'micstat';
+    const ok = await Hand.start($('#handVideo'), $('#handOverlay'), {
+      status: (m, lvl) => { st.textContent = m; st.className = 'micstat ' + (lvl === 'info' ? '' : lvl); },
+      frame: o => {
+        lab.textContent = !o.hand ? 'keine Hand' : o.label ? `${o.label} ${o.conf.toFixed(2)}` : 'Hand: –'; lab.classList.toggle('hit', !!o.label);
+        const i = o.info; dbg.textContent = i ? `Zeige ${i.idx.toFixed(2)} Mittel ${i.mid.toFixed(2)} Ring ${i.rng.toFixed(2)} Klein ${i.pnk.toFixed(2)} · hoch ${i.up.toFixed(2)} runter ${i.down.toFixed(2)} · Handfläche waagerecht ${i.palmV.toFixed(2)}` : '';
+      },
+      send: (label, conf) => api('gesture_live', { label, conf }),
+    });
+    btn.disabled = false; setBtn(!!ok);
+  };
+  btn.onclick = toggle; initHand.toggle = toggle;
+}
+
 /* ------------------------------------------------------------------ Start */
 try { const t = localStorage.getItem('theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) { /* egal */ }
 window.addEventListener('resize', resize);
 new ResizeObserver(resize).observe(cv.parentElement);
 initControls(); buildFsm(); resize(); loadScenarios(); loadInfo();
 $('#tVoice').onclick = () => startJob('voice'); $('#tGesture').onclick = () => startJob('gesture'); $('#tMC').onclick = () => { $('#tN').value = Math.min(+$('#tN').value, 100); startJob('montecarlo'); };
-initView(); initMic(); connect(); drawArena();
+initView(); initMic(); initHand(); connect(); drawArena();
