@@ -31,7 +31,12 @@ class KeywordSpotter:
     def __init__(self, cfg: Config, rng: random.Random):
         self.cfg, self.rng = cfg, rng
         self._pending: list[tuple[float, str, float]] = []   # (ready_t, wort, distanz)
+        self._live: list[KeywordEvent] = []                  # echtes Mikrofon des Bedieners (Browser)
         self._last_false = 0.0
+
+    def inject(self, word: str, conf: float, now: float) -> None:
+        """Echte Spracherkennung (Browser-Mikrofon): umgeht das statistische Modell, geht aber durch dieselbe Brain-Schwelle."""
+        self._live.append(KeywordEvent(word, conf, now, word))
 
     def vocab(self) -> tuple:
         return WORDS + (self.cfg.brain.extra_command_word,)
@@ -65,7 +70,11 @@ class KeywordSpotter:
         env = self.cfg.env
         if not env.mic_ok:
             self._pending.clear()
+            self._live.clear()
             return out
+        if self._live:
+            out.extend(self._live)
+            self._live.clear()
         keep = []
         for ready, word, dist in self._pending:
             if ready <= now:

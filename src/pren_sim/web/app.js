@@ -209,6 +209,7 @@ function initControls() {
       '5': ['say', { word: 'KUNSTSTUECK' }], q: ['gesture', { name: 'SITZ' }], w: ['gesture', { name: 'PLATZ' }], e: ['gesture', { name: 'AUF' }],
       n: ['estop', {}], s: ['button', {}] }[k];
     if (m) { api(m[0], m[1]); e.preventDefault(); }
+    if (k === 'm' && initMic.toggle) { initMic.toggle(); e.preventDefault(); }
     if (k === ' ') { api('sim', { paused: !(snap && snap.paused) }); e.preventDefault(); }
   });
   // Tabs
@@ -355,6 +356,11 @@ function drawArena() {
   ctx.setTransform(view.dpr, 0, 0, view.dpr, 0, 0);
   ctx.clearRect(0, 0, view.w, view.h);
   const s = snap; if (!s) return;
+  if (viewMode === '3d') {
+    window.__trailTrue = trailTrue; window.__trailOdom = trailOdom;
+    Scene3D.frame(s, curPoseFrom, { fov: $('#vFov').checked, trail: $('#vTrail').checked, odom: $('#vOdom').checked, grid: $('#vGrid').checked });
+    drawSide(s); return;
+  }
   const S = view.s;
   // Raster
   if ($('#vGrid').checked) {
@@ -499,10 +505,48 @@ cv.addEventListener('pointermove', e => {
 cv.addEventListener('pointerup', e => { if (drag) { const [x, y] = pointerWorld(e); if (drag === 'bone') api('bone', { x, y }); drag = null; } });
 cv.addEventListener('dblclick', e => { const [x, y] = pointerWorld(e); api('bone', { x, y, th: Math.random() * 6.28 - 3.14 }); });
 
+/* ------------------------------------------------------------------ 2D / 3D */
+let viewMode = '2d', gl3dFailed = false;
+function setView(v) {
+  if (v === '3d' && gl3dFailed) return;
+  if (v === '3d' && typeof THREE === 'undefined') { gl3dFailed = true; alert('three.js nicht geladen (web/three.min.js fehlt).'); return; }
+  if (v === '3d' && !setView.ready) {
+    try { Scene3D.init($('#view3d'), $('#camHud')); setView.ready = true; }
+    catch (e) { gl3dFailed = true; console.error(e); alert('3D nicht möglich (WebGL nicht verfügbar): ' + e.message); return; }
+  }
+  viewMode = v;
+  $$('#viewSeg button').forEach(b => b.classList.toggle('on', b.dataset.view === v));
+  $('#arena').hidden = v === '3d'; $('#view3d').hidden = v !== '3d'; $('#camHud').hidden = v !== '3d'; $('#camSeg').hidden = v !== '3d';
+  if (v === '3d') Scene3D.resize();
+  try { localStorage.setItem('view', v); } catch (e) { /* egal */ }
+}
+function initView() {
+  $$('#viewSeg button').forEach(b => b.onclick = () => setView(b.dataset.view));
+  $$('#camSeg button').forEach(b => b.onclick = () => { Scene3D.setMode(b.dataset.cam); $$('#camSeg button').forEach(x => x.classList.toggle('on', x === b)); });
+  new ResizeObserver(() => { if (setView.ready) Scene3D.resize(); }).observe($('.canvaswrap'));
+  try { if (localStorage.getItem('view') === '3d') setView('3d'); } catch (e) { /* egal */ }
+}
+
+/* ------------------------------------------------------------------ Mikrofon (Live-Sprachbefehle) */
+function initMic() {
+  const btn = $('#btnMic'), st = $('#micStat'), hd = $('#micHeard');
+  if (!Mic.supported) { st.textContent = 'Dieser Browser hat keine Spracherkennung (Chrome/Edge verwenden).'; st.className = 'micstat bad'; btn.disabled = true; return; }
+  const toggle = () => {
+    if (Mic.on) { Mic.stop(); btn.textContent = '🎤 Mikrofon einschalten'; btn.classList.remove('live'); return; }
+    const ok = Mic.start({
+      status: (m, lvl) => { st.textContent = m; st.className = 'micstat ' + (lvl === 'info' ? '' : lvl); if (lvl === 'bad') { btn.textContent = '🎤 Mikrofon einschalten'; btn.classList.remove('live'); } },
+      heard: (t, matched, fin) => { hd.innerHTML = (matched ? '<b>' : '') + (fin ? '' : '… ') + t.replace(/</g, '&lt;') + (matched ? '</b>' : ''); },
+      word: (w, conf, text) => api('say_live', { word: w, conf, text }),
+    });
+    if (ok) { btn.textContent = '⏹ Mikrofon ausschalten'; btn.classList.add('live'); }
+  };
+  btn.onclick = toggle; initMic.toggle = toggle;
+}
+
 /* ------------------------------------------------------------------ Start */
 try { const t = localStorage.getItem('theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) { /* egal */ }
 window.addEventListener('resize', resize);
 new ResizeObserver(resize).observe(cv.parentElement);
 initControls(); buildFsm(); resize(); loadScenarios(); loadInfo();
 $('#tVoice').onclick = () => startJob('voice'); $('#tGesture').onclick = () => startJob('gesture'); $('#tMC').onclick = () => { $('#tN').value = Math.min(+$('#tN').value, 100); startJob('montecarlo'); };
-connect(); drawArena();
+initView(); initMic(); connect(); drawArena();

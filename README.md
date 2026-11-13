@@ -55,6 +55,7 @@ Tests: `python -m unittest discover -s tests -v` (25 Tests, ca. 3 s).
   Schiedsrichter 0.5–2 m *vor* dem Gesicht, Hund startet mit dem Rücken zum Suchbereich (FAQ 9, 14; Besprechung KW41).
 * **Befehle:** Sprache HIER · BRAV · SITZ · SUCH, Gesten SITZ · PLATZ · AUF (AUF = Stand auf vier Beinen, FAQ 11), Zusatzbefehl (Kunststück, **Platzhalter**).
 * **Ablauf SUCH:** Umdrehen → Suchen → Anfahren → Berühren → **sofort melden** (FAQ 12) → Rückkehr per Odometrie → sitzen; Abbruch nach 2 min.
+* **3D-Ansicht + Roboter-Kamera** (three.js lokal) und **Live-Sprachbefehle über das Mikrofon** (Browser-Spracherkennung, Online-Dienst – siehe docs/BEDIENUNG.md).
 * **Fehlerinjektion:** Störgeräusch, Licht, knochenfarbener Boden, Mikrofon/Kamera/Fühler defekt, UART getrennt, Not-Aus.
 * **Anforderungsprüfung live:** jede Prüfung trägt die Nummer der Anforderungsliste V4 (Tab «Anforderungen»).
 * **8 Szenarien** (JSON in [`scenarios/`](scenarios)): Standardlauf, Taster-Fallback, Not-Aus, Knochen am Rand, 60 dB Lärm, dunkel + knochenfarbener Boden, UART-Ausfall, Abbruch nach 2 min.
@@ -63,7 +64,7 @@ Tests: `python -m unittest discover -s tests -v` (25 Tests, ca. 3 s).
 
 Links Schiedsrichter/Umgebung/Fehler, Mitte Spielfeld (Knochen und Schiedsrichter lassen sich ziehen, Doppelklick setzt den Knochen),
 rechts Status wie auf Folie 8 der Aufgabenstellung, Zustandsautomat, Wahrnehmung, Mikrocontroller, Energie. Unten Protokoll,
-Anforderungen, Szenarien, Tests, Info. Tasten: `1`–`5` Sprache, `Q W E` Gesten, `S` Start-Taster, `N` Not-Aus, `Leertaste` Pause.
+Anforderungen, Szenarien, Tests, Info. Tasten: `1`–`5` Sprache, `Q W E` Gesten, `S` Start-Taster, `M` Mikrofon, `N` Not-Aus, `Leertaste` Pause.
 Ausführlich: [docs/BEDIENUNG.md](docs/BEDIENUNG.md).
 
 ## Raspberry Pi 5

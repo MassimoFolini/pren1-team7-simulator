@@ -44,6 +44,12 @@
         <button class="btn cmd" data-say="SUCH" title="Taste 4">SUCH</button>
         <button class="btn cmd wide" data-say="KUNSTSTUECK" title="Taste 5">Zusatzbefehl <small>(Platzhalter)</small></button>
       </div>
+      <div class="mic">
+        <button class="btn" id="btnMic" title="Taste M">🎤 Mikrofon einschalten</button>
+        <div class="micstat" id="micStat">Sprich HIER · BRAV · SITZ · SUCH ins Mikrofon.</div>
+        <div class="micheard mono" id="micHeard"></div>
+        <p class="hint">Nutzt die Spracherkennung des Browsers (Chrome/Edge, <b>Online-Dienst</b>, nur auf localhost). Der echte Roboter erkennt lokal.</p>
+      </div>
       <h3>Gesten</h3>
       <div class="btns">
         <button class="btn cmd" data-gesture="SITZ" title="Taste Q">✋ SITZ</button>
@@ -100,6 +106,14 @@
         <span class="statebadge" id="stateBadge">INIT</span>
         <span id="poseBadge" class="chip">Haltung: –</span>
         <span id="outBadge" class="chip" hidden></span>
+        <div class="seg" id="viewSeg" role="group" aria-label="Ansicht">
+          <button data-view="2d" class="on">2D</button><button data-view="3d">3D</button>
+        </div>
+        <div class="seg" id="camSeg" role="group" aria-label="3D-Kamera" hidden>
+          <button data-cam="orbit" class="on" title="Frei drehen (Maus ziehen, Rad = Zoom, Shift/Rechtsklick = verschieben)">Übersicht</button>
+          <button data-cam="follow" title="Hinter dem Roboter">Folgen</button>
+          <button data-cam="first" title="Sicht der Roboter-Kamera, gross">Roboter-Kamera</button>
+        </div>
         <span class="spacer"></span>
         <label class="tog sm"><input type="checkbox" id="vFov" checked> Sichtfeld</label>
         <label class="tog sm"><input type="checkbox" id="vTrail" checked> Spur</label>
@@ -107,6 +121,7 @@
         <label class="tog sm"><input type="checkbox" id="vGrid" checked> Raster</label>
       </div>
       <div class="canvaswrap"><canvas id="arena" aria-label="Spielfeld aus der Vogelperspektive"></canvas>
+        <canvas id="view3d" hidden aria-label="3D-Ansicht"></canvas><canvas id="camHud" hidden></canvas>
         <div class="banner" id="banner" hidden></div></div>
     </div>
   </section>
@@ -178,6 +193,9 @@ confidence = 0.00</pre>
     <div class="pane" id="pane-inf"><div class="scroll info" id="infBox"></div></div>
   </section>
 </main>
+<script src="three.min.js"></script>
+<script src="scene3d.js"></script>
+<script src="mic.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

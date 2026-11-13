@@ -132,6 +132,8 @@ class SimHost:
             s = self.sim
             if path == "say":
                 s.say(str(body["word"]))
+            elif path == "say_live":
+                s.say_live(str(body["word"]), float(body.get("conf", 0.8)), str(body.get("text", ""))[:60])
             elif path == "gesture":
                 s.gesture(str(body["name"]))
             elif path == "button":

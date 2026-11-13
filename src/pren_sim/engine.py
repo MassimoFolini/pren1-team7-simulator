@@ -51,17 +51,28 @@ class Simulation:
         self.cmd_history: list[dict] = []
         self._entered_field = False
         self._n_complete = 0
+        self.ref_say = ("", 0.0)
+        self.ref_gesture = ("", 0.0)
 
     # ------------------------------------------------------------------ Eingriffe (Schiedsrichter / Bediener)
     def say(self, word: str) -> None:
         w = word.upper()
         self.sensors.mic.utter(w, self.t, self._ref_dist())
+        self.ref_say = (w, self.t + 1.6)
         self.log.add(self.t, "REFEREE", "say", f"Schiedsrichter sagt «{w}» ({self._ref_dist():.1f} m)", word=w)
 
     def gesture(self, name: str) -> None:
         g = name.upper()
         self.sensors.gestures.perform(g, self.t, self._ref_dist())
+        self.ref_gesture = (g, self.t + 2.9)
         self.log.add(self.t, "REFEREE", "gesture", f"Schiedsrichter zeigt Geste «{g}»", name=g)
+
+    def say_live(self, word: str, conf: float, text: str = "") -> None:
+        """Befehl aus dem echten Mikrofon des Bedieners (Browser-Spracherkennung)."""
+        w = word.upper()
+        self.sensors.mic.inject(w, max(0.0, min(1.0, conf)), self.t)
+        self.ref_say = (w, self.t + 1.6)
+        self.log.add(self.t, "REFEREE", "say_live", f"Mikrofon live: «{text or w}» -> {w} ({conf:.2f})", word=w, conf=round(conf, 2))
 
     def press_start(self) -> None:
         self.log.add(self.t, "REFEREE", "button", "Start-Taster gedrueckt")
@@ -193,7 +204,9 @@ class Simulation:
             "odom": {"x": round(m.ox, 4), "y": round(m.oy, 4), "th": round(m.oth, 4)},
             "bone": {"x": round(bone.x, 3), "y": round(bone.y, 3), "th": round(bone.th, 3),
                      "bearing": round(bearing, 3), "dist": round(dist, 3), "in_sector": w.bone_in_sector()},
-            "referee": {"x": w.referee[0], "y": w.referee[1]},
+            "referee": {"x": w.referee[0], "y": w.referee[1],
+                        "say": self.ref_say[0] if self.t < self.ref_say[1] else "",
+                        "gesture": self.ref_gesture[0] if self.t < self.ref_gesture[1] else ""},
             "tof": None if f is None or f.tof is None else round(f.tof, 3),
             "detect": None if (f is None or f.bone is None) else {"bearing": round(f.bone.bearing, 3), "dist": round(f.bone.dist, 3),
                                                                   "conf": round(f.bone.conf, 2)},

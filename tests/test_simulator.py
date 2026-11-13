@@ -126,6 +126,16 @@ class Ablauf(unittest.TestCase):
         s.run_until(lambda x: x.brain.state == B.SUCHEN, 20)
         self.assertLess(abs(wrap(s.plant.th - 0.0)), math.radians(8))     # Kopf zeigt in den Suchbereich
 
+    def test_live_mikrofon_durchlaeuft_brain_schwelle(self):
+        s = ready_sim()
+        s.say_live("SUCH", 0.3, "such")            # zu unsicher: unter der Schwelle 0.6
+        s.run_for(2)
+        self.assertEqual(s.brain.state, B.BEREIT)
+        s.say_live("SUCH", 0.9, "such")
+        s.run_for(2)
+        self.assertNotEqual(s.brain.state, B.BEREIT)
+        self.assertTrue(s.log.find("say_live"))
+
     def test_taster_ersetzt_ausgefallene_sprache(self):
         s = ready_sim(mic_ok=False)
         s.say("SUCH")
